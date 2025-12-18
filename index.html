@@ -1,0 +1,92 @@
+import Find from '../views/Find'
+import Mine from '../views/Mine'
+import Moment from '../views/Moment'
+import Recommend from '../views/Recommend'
+
+interface TabClass {
+  icon: Resource // 图标，类型为 Resource 资源
+  text: string // 文本
+  name: string // 用于切换的标识
+}
+
+@Entry
+@Component
+struct Index {
+  // 自定义数据，string [] 表示 字符串数组 (数组的每一项都是字符串)
+  // tabData: string[] = ['推荐', '发现', '动态', '我的']
+  // 对象数组，数组的每一项，都是对象
+  tabData: TabClass[] = [
+    { icon: $r('app.media.ic_recommend'), text: '推荐', name: 'recommend' },
+    { icon: $r('app.media.ic_find'), text: '发现', name: 'find' },
+    { icon: $r('app.media.ic_moment'), text: '动态', name: 'moment' },
+    { icon: $r('app.media.ic_mine'), text: '我的', name: 'mine' },
+  ]
+  // @State 定义状态，状态更新，视图界面也会更新
+  @State isActive: string = 'recommend'
+
+  // @Builder 自定义结构(可以理解为一个特殊的函数，用于构建结构)
+  @Builder
+  tabBarBuilder(item: TabClass) {
+    Column({ space: 5 }) {
+      Image(item.icon)
+        .height(24)// 三元表达式/三元运算符        条件 ? 成功 : 不成立
+        .fillColor(this.isActive === item.name ? '#e4608b' : '#6da8a5') // '#e4608b' : '#6da8a5'
+      Text(item.text)
+        .fontSize(14)
+        .fontColor(this.isActive === item.name ? '#e4608b' : '#6da8a5')
+    }
+  }
+
+  // UI 描述
+  build() {
+    // Tabs 大容器，barPosition 可以调整按钮的位置
+    Tabs({ barPosition: BarPosition.End }) {
+      // // TabContent   切换的内容
+      // TabContent() {
+      //   // 切换的内容可以放置其他组件
+      //   Text('推荐视图')
+      // }
+      // .tabBar('推荐') // 用于切换的按钮
+      //
+      // TabContent() {
+      //   Text('发现视图')
+      // }
+      // .tabBar('发现')
+
+      // ForEach 循环渲染
+      ForEach(this.tabData, (item: TabClass) => {
+        // 通过循环生成多个 TabContent 组件
+        TabContent() {
+          // + 号连接字符串
+          // Text(item.text + '视图')
+          // if 条件渲染
+          if (item.name === 'recommend') {
+            Recommend()
+          } else if (item.name === 'find') {
+            Find()
+          } else if (item.name === 'moment') {
+            Moment()
+          } else if (item.name === 'mine') {
+            Mine()
+          }
+        }
+        .padding({ top: AppStorage.get('safeTop') as number })
+        .backgroundColor('#131215')
+        .tabBar(this.tabBarBuilder(item))
+      })
+    }
+    .padding({ bottom: AppStorage.get('safeBottom') as number })
+    .backgroundColor('#3b3f42')
+    // Tabs 下标发生变化时，触发 onChange
+    .onChange((index: number) => {
+      // 控制台日志打印，第一个参数必须是字符串，后面的参数会自动 toString 转换成字符串打印
+      // console.log('字符串标记', index)
+      // 通过弹窗方式看数据，推荐使用
+      // AlertDialog.show({ message: index.toString() })
+      // 如果是查看对象，可通过 JSON.stringify(对象, null, 2) 把对象转换成 JSON 字符串
+      // AlertDialog.show({ message: JSON.stringify(this.tabData[index], null, 2) })
+      // @State 状态改变，视图能自动更新
+      this.isActive = this.tabData[index].name
+    })
+  }
+}
